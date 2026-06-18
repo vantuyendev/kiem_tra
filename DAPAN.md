@@ -1,67 +1,154 @@
 # BÀI LÀM KIỂM TRA GIỮA KỲ
 ## HỌC PHẦN: THIẾT KẾ WEB NÂNG CAO
 
-- **Họ và tên:** [Điền họ tên của bạn vào đây]
-- **MSSV:** [Điền MSSV của bạn vào đây]
+- **Họ và tên:** Vạn Tuyên
+- **MSSV:** 24100462
 - **Lớp:** [Điền lớp của bạn vào đây]
 
 ---
 
 ## PHẦN 1. PHÂN TÍCH PROJECT
 
-### **Câu 1: Lập bảng xác định file xử lý cho chức năng hiển thị danh sách sinh viên**
+### **Câu 1: Bảng xác định file xử lý hiển thị danh sách sinh viên**
 
-Bảng dưới đây xác định các file chịu trách nhiệm xử lý trong mô hình MVC cho chức năng hiển thị danh sách sinh viên:
-
-| Thành phần MVC | Tên file xử lý | Đường dẫn chi tiết | Mô tả vai trò cụ thể |
+| Thành phần | File xử lý | Đường dẫn | Vai trò cụ thể |
 | :--- | :--- | :--- | :--- |
-| **Route** | studentRoutes.js | `student-management/routes/studentRoutes.js` | Tiếp nhận request GET gửi tới `/students`. |
-| **Controller** | studentController.js | `student-management/controllers/studentController.js` | Hàm `index(req, res)` tiếp nhận yêu cầu từ route, điều phối gọi Model để lấy dữ liệu và render ra View. |
-| **Model** | studentModel.js | `student-management/models/studentModel.js` | Hàm `getAllStudents()` và `searchStudents(keyword)` thực hiện truy vấn SQL lấy dữ liệu từ database SQLite. |
-| **View** | index.ejs | `student-management/views/students/index.ejs` | Nhận danh sách sinh viên từ controller và hiển thị thành bảng trên trình duyệt Client. |
+| **Route** | `studentRoutes.js` | [studentRoutes.js](file:///workspaces/kiem_tra/student-management/routes/studentRoutes.js) | Tiếp nhận yêu cầu GET gửi tới `/students` |
+| **Controller** | `studentController.js` | [studentController.js](file:///workspaces/kiem_tra/student-management/controllers/studentController.js) | Gọi Model lấy danh sách và gửi sang View để render giao diện |
+| **Model** | `studentModel.js` | [studentModel.js](file:///workspaces/kiem_tra/student-management/models/studentModel.js) | Thực thi SQL SELECT truy vấn danh sách từ SQLite database |
+| **View** | `index.ejs` | [index.ejs](file:///workspaces/kiem_tra/student-management/views/students/index.ejs) | Nhận dữ liệu sinh viên từ Controller và render ra bảng HTML |
+
+### **Câu 2: Luồng xử lý khi truy cập GET `/students`**
+
+1. **`app.js`**: Tiếp nhận request `/students`, chuyển tiếp yêu cầu sang `studentRoutes`.
+2. **`studentRoutes.js`**: Khớp route `/` (GET) và gọi hàm `studentController.index`.
+3. **`studentController.js`**: Hàm `index` lấy từ khóa tìm kiếm (nếu có), gọi model `getAllStudents` hoặc `searchStudents`.
+4. **`studentModel.js`**: Truy vấn SQLite để lấy dữ liệu rồi trả kết quả (dưới dạng Promise) về cho Controller.
+5. **`studentController.js`**: Nhận dữ liệu, truyền sang view và gọi `res.render("students/index")`.
+6. **`index.ejs`**: Biên dịch mã EJS thành tài liệu HTML hoàn chỉnh và trả về cho trình duyệt Client.
+
+### **Câu 3: Vai trò các thành phần trong mô hình MVC**
+
+- **Routes**: Định tuyến đường đi cho request, kết nối URL và phương thức HTTP (GET, POST) với hàm xử lý trong Controller.
+- **Controllers**: Trung tâm xử lý logic nghiệp vụ; tiếp nhận tham số đầu vào, điều phối gọi Model xử lý dữ liệu và chọn View hiển thị kết quả.
+- **Models**: Trực tiếp tương tác với cơ sở dữ liệu (SQLite), thực thi các câu lệnh SQL để truy vấn/ghi/xóa dữ liệu.
+- **Views**: Định nghĩa giao diện HTML và các thẻ ejs để hiển thị dữ liệu trực quan cho người dùng cuối.
 
 ---
 
-### **Câu 2: Mô tả luồng xử lý khi truy cập GET `/students`**
+## PHẦN 2. SỬA LỖI PROJECT
 
-Luồng xử lý khi người dùng truy cập `GET /students` diễn ra theo thứ tự các file như sau:
+### **1. Lỗi 1: Không thể GET `/students/create` (Cannot GET /students/create)**
+- **Nguyên nhân**: Nút thêm sinh viên dẫn tới `/students/create`, nhưng route GET hiển thị form trong [studentRoutes.js](file:///workspaces/kiem_tra/student-management/routes/studentRoutes.js) lại định nghĩa sai là `/add`.
+- **Cách sửa**: Sửa đường dẫn route GET trong file [studentRoutes.js](file:///workspaces/kiem_tra/student-management/routes/studentRoutes.js) từ `/add` thành `/create`:
+  ```javascript
+  router.get("/create", studentController.createForm)
+  ```
 
-1. **`student-management/app.js`**:
-   - Nhận request từ trình duyệt Client gửi tới đường dẫn `/students`.
-   - Sử dụng middleware `app.use("/students", studentRoutes)` để chuyển tiếp yêu cầu đến Router.
+### **2. Lỗi 2: Báo lỗi không tìm thấy view (Cannot find view) sau khi submit form thêm mới**
+- **Nguyên nhân**: Hàm `store` trong [studentController.js](file:///workspaces/kiem_tra/student-management/controllers/studentController.js) gọi `res.render("students/list")` nhưng không có tệp view `list.ejs`. Theo nguyên tắc web, sau khi thêm dữ liệu (POST) cần redirect về trang danh sách (GET).
+- **Cách sửa**: Sửa lại dòng kết quả thành chuyển hướng (redirect) về trang danh sách:
+  ```javascript
+  res.redirect("/students")
+  ```
 
-2. **`student-management/routes/studentRoutes.js`**:
-   - Router so khớp đường dẫn gốc `/` của `/students` qua định nghĩa:
-     ```javascript
-     router.get("/", studentController.index)
-     ```
-   - Chuyển quyền xử lý cho hàm `index` thuộc `studentController`.
+### **3. Lỗi 3: Không lọc được kết quả khi tìm kiếm**
+- **Nguyên nhân**: Hàm `searchStudents(keyword)` trong [studentModel.js](file:///workspaces/kiem_tra/student-management/models/studentModel.js) không sử dụng tham số đầu vào `keyword` mà chỉ chạy câu lệnh SELECT lấy toàn bộ dữ liệu.
+- **Cách sửa**: Cập nhật câu lệnh SQL có điều kiện lọc `WHERE ... LIKE ?`:
+  ```javascript
+  const sql = `SELECT * FROM students WHERE student_code LIKE ? OR fullname LIKE ? OR major LIKE ? ORDER BY id DESC`
+  ```
 
-3. **`student-management/controllers/studentController.js`**:
-   - Hàm `index` đọc query parameter `keyword` từ Client gửi lên.
-   - Nếu `keyword` trống (truy cập danh sách bình thường), Controller gọi hàm `studentModel.getAllStudents()`.
-   - Nếu `keyword` có dữ liệu (thực hiện tìm kiếm), Controller gọi hàm `studentModel.searchStudents(keyword)`.
-
-4. **`student-management/models/studentModel.js`**:
-   - Hàm `getAllStudents` hoặc `searchStudents` tương tác với file kết nối database `config/db.js` để thực thi câu lệnh SQL SELECT lấy dữ liệu.
-   - Trả dữ liệu mảng kết quả về cho Controller dưới dạng một `Promise`.
-
-5. **`student-management/controllers/studentController.js`**:
-   - Sau khi nhận được dữ liệu từ Model, Controller gọi:
-     ```javascript
-     res.render("students/index", { students: students, keyword: keyword, ... })
-     ```
-   - Truyền dữ liệu sang View engine EJS để chuẩn bị kết xuất giao diện.
-
-6. **`student-management/views/students/index.ejs`**:
-   - View engine EJS thực hiện biên dịch mã HTML tĩnh kết hợp chèn dữ liệu động (sử dụng vòng lặp `students.forEach` để hiển thị dữ liệu ra bảng).
-   - Render thành tài liệu HTML hoàn chỉnh và gửi trả về phía trình duyệt Client.
+### **4. Lỗi 4: Chức năng sửa và xóa không làm thay đổi dữ liệu trong CSDL**
+- **Nguyên nhân**: Hàm `updateStudent` và `deleteStudent` trong [studentModel.js](file:///workspaces/kiem_tra/student-management/models/studentModel.js) mới chỉ viết giả lập (`resolve(0)`) mà chưa tương tác với cơ sở dữ liệu.
+- **Cách sửa**: Bổ sung truy vấn SQL `UPDATE` và `DELETE` thực tế xuống SQLite:
+  - Hàm `updateStudent`: Chạy lệnh `UPDATE students SET student_code = ?, fullname = ?, email = ?, major = ?, gpa = ? WHERE id = ?`.
+  - Hàm `deleteStudent`: Chạy lệnh `DELETE FROM students WHERE id = ?`.
 
 ---
 
-### **Câu 3: Giải thích ngắn gọn vai trò của Routes, Controllers, Models, Views trong project**
+## PHẦN 3. BỔ SUNG CHỨC NĂNG TÌM KIẾM
 
-- **Routes (Định tuyến)**: Làm nhiệm vụ định hướng đường đi cho các request. Nó liên kết các đường dẫn URL và phương thức HTTP (GET, POST...) với các hàm xử lý hành động cụ thể ở Controller.
-- **Controllers (Bộ điều khiển)**: Đóng vai trò là trung tâm xử lý logic nghiệp vụ. Nó tiếp nhận các tham số đầu vào từ Route, giao tiếp với Model để xử lý dữ liệu và chỉ định View tương ứng để hiển thị kết quả về cho Client.
-- **Models (Mô hình dữ liệu)**: Chịu trách nhiệm giao tiếp trực tiếp với cơ sở dữ liệu (SQLite), thực thi các câu lệnh SQL để truy vấn hoặc cập nhật dữ liệu, sau đó trả kết quả về cho Controller.
-- **Views (Giao diện hiển thị)**: Chứa giao diện HTML và các thẻ template EJS nhằm hiển thị dữ liệu trực quan cho người dùng cuối tương tác.
+### **Hoàn thiện tìm kiếm theo mã SV, họ tên, ngành học**
+
+- **Model ([studentModel.js](file:///workspaces/kiem_tra/student-management/models/studentModel.js))**:
+  ```javascript
+  function searchStudents(keyword) {
+    return new Promise((resolve, reject) => {
+      const searchPattern = `%${keyword}%`
+      const sql = `SELECT * FROM students WHERE student_code LIKE ? OR fullname LIKE ? OR major LIKE ? ORDER BY id DESC`
+      db.all(sql, [searchPattern, searchPattern, searchPattern], (error, rows) => {
+        if (error) reject(error)
+        else resolve(rows)
+      })
+    })
+  }
+  ```
+- **Controller ([studentController.js](file:///workspaces/kiem_tra/student-management/controllers/studentController.js))**: Lấy `keyword = req.query.keyword || ""`, nếu có thì gọi hàm search của Model. Khi render truyền `keyword` và `message` (nếu mảng kết quả trống thì `message = "Không tìm thấy sinh viên phù hợp"`).
+- **View ([index.ejs](file:///workspaces/kiem_tra/student-management/views/students/index.ejs))**: Gán thuộc tính `value="<%= keyword %>"` cho ô tìm kiếm và in thông báo lỗi nếu có `message`.
+
+---
+
+## PHẦN 4. HOÀN THIỆN CHỨC NĂNG SỬA SINH VIÊN
+
+### **Hoàn thiện chức năng sửa**
+
+- **Route ([studentRoutes.js](file:///workspaces/kiem_tra/student-management/routes/studentRoutes.js))**:
+  ```javascript
+  router.get("/edit/:id", studentController.editForm)
+  router.post("/edit/:id", studentController.update)
+  ```
+- **Model ([studentModel.js](file:///workspaces/kiem_tra/student-management/models/studentModel.js))**:
+  ```javascript
+  function updateStudent(id, student) {
+    return new Promise((resolve, reject) => {
+      const sql = `UPDATE students SET student_code = ?, fullname = ?, email = ?, major = ?, gpa = ? WHERE id = ?`
+      db.run(sql, [student.student_code, student.fullname, student.email, student.major, student.gpa, id], function (error) {
+        if (error) reject(error)
+        else resolve(this.changes)
+      })
+    })
+  }
+  ```
+- **Controller & View**: Hàm `editForm` lấy thông tin cũ truyền sang view để điền sẵn vào form bằng thuộc tính `value="<%= student.field %>"`. Hàm `update` lấy thông tin mới từ `req.body`, gọi model cập nhật và thực hiện `res.redirect("/students")`.
+
+---
+
+## PHẦN 5. HOÀN THIỆN CHỨC NĂNG XÓA SINH VIÊN
+
+### **Hoàn thiện chức năng xóa**
+
+- **Route ([studentRoutes.js](file:///workspaces/kiem_tra/student-management/routes/studentRoutes.js))**: Sử dụng phương thức POST để đảm bảo an toàn.
+  ```javascript
+  router.post("/delete/:id", studentController.destroy)
+  ```
+- **Model ([studentModel.js](file:///workspaces/kiem_tra/student-management/models/studentModel.js))**:
+  ```javascript
+  function deleteStudent(id) {
+    return new Promise((resolve, reject) => {
+      const sql = "DELETE FROM students WHERE id = ?"
+      db.run(sql, [id], function (error) {
+        if (error) reject(error)
+        else resolve(this.changes)
+      })
+    })
+  }
+  ```
+- **View ([index.ejs](file:///workspaces/kiem_tra/student-management/views/students/index.ejs))**: Gói nút xóa trong một thẻ `<form>` POST:
+  ```html
+  <form method="POST" action="/students/delete/<%= student.id %>" class="inline-form">
+    <button type="submit" onclick="return confirm('Bạn có chắc chắn muốn xóa?')">Xóa</button>
+  </form>
+  ```
+
+---
+
+## PHẦN 6. ĐỌC HIỂU CODE VÀ GIẢI THÍCH
+
+- **Câu 1**: `:id` là tham số động (route parameter) trên URL đại diện cho ID của sinh viên được chọn. Nó giúp dùng chung một định tuyến cho nhiều bản ghi khác nhau.
+- **Câu 2**: Giá trị `req.params.id` trích xuất từ URL gửi lên của request, tương ứng với vị trí của tham số `:id` được cấu hình trên route.
+- **Câu 3**: Dùng `req.body.id` sẽ khiến ID bị `undefined` (do ID nằm trên URL chứ không đính kèm trong thân request), từ đó Model nhận ID rỗng và câu lệnh xóa SQLite sẽ không thành công.
+- **Câu 4**: Nên dùng POST thay vì GET vì:
+  1. GET chỉ dành cho đọc dữ liệu (safe & idempotent) theo chuẩn RESTful.
+  2. Tránh rủi ro bị các công cụ prefetch trình duyệt, bots hoặc click nhầm trong lịch sử duyệt web tự động kích hoạt đường dẫn GET xóa dữ liệu ngoài ý muốn.
+- **Câu 5**: Nếu bỏ `res.redirect("/students")`, trình duyệt người dùng sẽ bị treo (loading) vô hạn tới khi timeout vì không nhận được phản hồi kết thúc request, đồng thời tăng rủi ro gửi trùng request xóa khi bấm F5 tải lại trang.
