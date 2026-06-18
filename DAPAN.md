@@ -126,14 +126,13 @@
   ```
 - **Controller & View**: Hàm `editForm` lấy thông tin cũ từ database truyền sang view để điền sẵn vào form bằng thuộc tính `value="<%= student.field %>"`. Hàm `update` lấy thông tin mới từ `req.body`, gọi model cập nhật và thực hiện `res.redirect("/students")`.
 - **Minh chứng kết quả**:
-  * **Form sửa hiển thị đầy đủ dữ liệu cũ của sinh viên**:
-    ![Form sửa hiển thị thông tin cũ](dapan/phan4/old_edit.png)
-    ![Form sửa mới nhập liệu](dapan/phan4/new_edit.png)
-  * **Thông tin sinh viên trước và sau khi sửa đổi**:
-    * Thông tin sinh viên trước khi sửa (trong danh sách):
-      ![Thông tin trước khi sửa](dapan/phan4/old_changed.png)
-    * Dữ liệu trong danh sách đã được cập nhật thành công (sau khi sửa):
-      ![Dữ liệu sau khi sửa](dapan/phan4/new_changed.png)
+  * **OLD CODE**:
+    ![](dapan/phan4/old_edit.png)
+    ![](dapan/phan4/old_changed.png)
+---
+  * **NEW CODE**:
+    ![](dapan/phan4/new_edit.png)
+    ![](dapan/phan4/new_changed.png)
 
 ---
 
