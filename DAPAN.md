@@ -1,12 +1,3 @@
-# BÀI LÀM KIỂM TRA GIỮA KỲ
-## HỌC PHẦN: THIẾT KẾ WEB NÂNG CAO
-
-- **Họ và tên:** Vạn Tuyên
-- **MSSV:** 24100462
-- **Lớp:** [Điền lớp của bạn vào đây]
-
----
-
 ## PHẦN 1. PHÂN TÍCH PROJECT
 
 ### **Câu 1: Bảng xác định file xử lý hiển thị danh sách sinh viên**
@@ -96,9 +87,9 @@
 - **Controller (controllers/studentController.js)**: Lấy `keyword = req.query.keyword || ""`, nếu có thì gọi hàm search của Model. Khi render truyền `keyword` và `message` (nếu mảng kết quả trống thì `message = "Không tìm thấy sinh viên phù hợp"`).
 - **View (views/students/index.ejs)**: Gán thuộc tính `value="<%= keyword %>"` cho ô tìm kiếm và in thông báo lỗi nếu có `message`.
 - **Minh chứng kết quả**:
-  * **Trước khi tìm kiếm** (hiển thị toàn bộ sinh viên):
+  * **OLD** (hiển thị toàn bộ sinh viên):
     ![Trước khi tìm kiếm](dapan/phan3/before.png)
-  * **Sau khi tìm kiếm với từ khóa** (lọc chính xác kết quả):
+  * **NEW** (lọc chính xác kết quả):
     ![Sau khi tìm kiếm](dapan/phan3/after.png)
 
 ---
