@@ -15,7 +15,7 @@ async function index(req, res) {
     res.render("students/index", {
       students: students,
       keyword: keyword,
-      message: students.length === 0 ? "Khong tim thay sinh vien phu hop" : ""
+      message: students.length === 0 ? "Không tìm thấy sinh viên phù hợp" : ""
     })
   } catch (error) {
     console.log(error)
@@ -39,7 +39,7 @@ async function store(req, res) {
 
     await studentModel.createStudent(student)
 
-    res.render("students/list")
+    res.redirect("/students")
   } catch (error) {
     console.log(error)
     res.send("Lỗi khi thêm sinh viên")

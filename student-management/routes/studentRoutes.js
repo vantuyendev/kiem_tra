@@ -6,7 +6,7 @@ const studentController = require("../controllers/studentController")
 
 router.get("/", studentController.index)
 
-router.get("/add", studentController.createForm)
+router.get("/create", studentController.createForm)
 
 router.post("/create", studentController.store)
 
