@@ -1,22 +1,13 @@
-# BÀI LÀM KIỂM TRA GIỮA KỲ
-## HỌC PHẦN: THIẾT KẾ WEB NÂNG CAO
-
-- **Họ và tên:** Vạn Tuyên
-- **MSSV:** 24100462
-- **Lớp:** [Điền lớp của bạn vào đây]
-
----
-
 ## PHẦN 1. PHÂN TÍCH PROJECT
 
 ### **Câu 1: Bảng xác định file xử lý hiển thị danh sách sinh viên**
 
 | Thành phần | File xử lý | Đường dẫn | Vai trò cụ thể |
 | :--- | :--- | :--- | :--- |
-| **Route** | `studentRoutes.js` | [studentRoutes.js](file:///workspaces/kiem_tra/student-management/routes/studentRoutes.js) | Tiếp nhận yêu cầu GET gửi tới `/students` |
-| **Controller** | `studentController.js` | [studentController.js](file:///workspaces/kiem_tra/student-management/controllers/studentController.js) | Gọi Model lấy danh sách và gửi sang View để render giao diện |
-| **Model** | `studentModel.js` | [studentModel.js](file:///workspaces/kiem_tra/student-management/models/studentModel.js) | Thực thi SQL SELECT truy vấn danh sách từ SQLite database |
-| **View** | `index.ejs` | [index.ejs](file:///workspaces/kiem_tra/student-management/views/students/index.ejs) | Nhận dữ liệu sinh viên từ Controller và render ra bảng HTML |
+| **Route** | `studentRoutes.js` | `student-management/routes/studentRoutes.js` | Tiếp nhận yêu cầu GET gửi tới `/students` |
+| **Controller** | `studentController.js` | `student-management/controllers/studentController.js` | Gọi Model lấy danh sách và gửi sang View để render giao diện |
+| **Model** | `studentModel.js` | `student-management/models/studentModel.js` | Thực thi SQL SELECT truy vấn danh sách từ SQLite database |
+| **View** | `index.ejs` | `student-management/views/students/index.ejs` | Nhận dữ liệu sinh viên từ Controller và render ra bảng HTML |
 
 ### **Câu 2: Luồng xử lý khi truy cập GET `/students`**
 
@@ -39,28 +30,28 @@
 ## PHẦN 2. SỬA LỖI PROJECT
 
 ### **1. Lỗi 1: Không thể GET `/students/create` (Cannot GET /students/create)**
-- **Nguyên nhân**: Nút thêm sinh viên dẫn tới `/students/create`, nhưng route GET hiển thị form trong [studentRoutes.js](file:///workspaces/kiem_tra/student-management/routes/studentRoutes.js) lại định nghĩa sai là `/add`.
-- **Cách sửa**: Sửa đường dẫn route GET trong file [studentRoutes.js](file:///workspaces/kiem_tra/student-management/routes/studentRoutes.js) từ `/add` thành `/create`:
+- **Nguyên nhân**: Nút thêm sinh viên dẫn tới `/students/create`, nhưng route GET hiển thị form trong **routes/studentRoutes.js** lại định nghĩa sai là `/add`.
+- **Cách sửa**: Sửa đường dẫn route GET trong file **routes/studentRoutes.js** từ `/add` thành `/create`:
   ```javascript
   router.get("/create", studentController.createForm)
   ```
 
 ### **2. Lỗi 2: Báo lỗi không tìm thấy view (Cannot find view) sau khi submit form thêm mới**
-- **Nguyên nhân**: Hàm `store` trong [studentController.js](file:///workspaces/kiem_tra/student-management/controllers/studentController.js) gọi `res.render("students/list")` nhưng không có tệp view `list.ejs`. Theo nguyên tắc web, sau khi thêm dữ liệu (POST) cần redirect về trang danh sách (GET).
+- **Nguyên nhân**: Hàm `store` trong **controllers/studentController.js** gọi `res.render("students/list")` nhưng không có tệp view `list.ejs`. Theo nguyên tắc web, sau khi thêm dữ liệu (POST) cần redirect về trang danh sách (GET).
 - **Cách sửa**: Sửa lại dòng kết quả thành chuyển hướng (redirect) về trang danh sách:
   ```javascript
   res.redirect("/students")
   ```
 
 ### **3. Lỗi 3: Không lọc được kết quả khi tìm kiếm**
-- **Nguyên nhân**: Hàm `searchStudents(keyword)` trong [studentModel.js](file:///workspaces/kiem_tra/student-management/models/studentModel.js) không sử dụng tham số đầu vào `keyword` mà chỉ chạy câu lệnh SELECT lấy toàn bộ dữ liệu.
-- **Cách sửa**: Cập nhật câu lệnh SQL có điều kiện lọc `WHERE ... LIKE ?`:
+- **Nguyên nhân**: Hàm `searchStudents(keyword)` trong **models/studentModel.js** không sử dụng tham số đầu vào `keyword` mà chỉ chạy câu lệnh SELECT lấy toàn bộ dữ liệu.
+- **Cách sửa**: Cập nhật câu lệnh SQL có điều kiện lọc `WHERE ... LIKE ?` trong file **models/studentModel.js**:
   ```javascript
   const sql = `SELECT * FROM students WHERE student_code LIKE ? OR fullname LIKE ? OR major LIKE ? ORDER BY id DESC`
   ```
 
 ### **4. Lỗi 4: Chức năng sửa và xóa không làm thay đổi dữ liệu trong CSDL**
-- **Nguyên nhân**: Hàm `updateStudent` và `deleteStudent` trong [studentModel.js](file:///workspaces/kiem_tra/student-management/models/studentModel.js) mới chỉ viết giả lập (`resolve(0)`) mà chưa tương tác với cơ sở dữ liệu.
+- **Nguyên nhân**: Hàm `updateStudent` và `deleteStudent` trong **models/studentModel.js** mới chỉ viết giả lập (`resolve(0)`) mà chưa tương tác với cơ sở dữ liệu.
 - **Cách sửa**: Bổ sung truy vấn SQL `UPDATE` và `DELETE` thực tế xuống SQLite:
   - Hàm `updateStudent`: Chạy lệnh `UPDATE students SET student_code = ?, fullname = ?, email = ?, major = ?, gpa = ? WHERE id = ?`.
   - Hàm `deleteStudent`: Chạy lệnh `DELETE FROM students WHERE id = ?`.
@@ -71,7 +62,7 @@
 
 ### **Hoàn thiện tìm kiếm theo mã SV, họ tên, ngành học**
 
-- **Model ([studentModel.js](file:///workspaces/kiem_tra/student-management/models/studentModel.js))**:
+- **Model (models/studentModel.js)**:
   ```javascript
   function searchStudents(keyword) {
     return new Promise((resolve, reject) => {
@@ -84,8 +75,8 @@
     })
   }
   ```
-- **Controller ([studentController.js](file:///workspaces/kiem_tra/student-management/controllers/studentController.js))**: Lấy `keyword = req.query.keyword || ""`, nếu có thì gọi hàm search của Model. Khi render truyền `keyword` và `message` (nếu mảng kết quả trống thì `message = "Không tìm thấy sinh viên phù hợp"`).
-- **View ([index.ejs](file:///workspaces/kiem_tra/student-management/views/students/index.ejs))**: Gán thuộc tính `value="<%= keyword %>"` cho ô tìm kiếm và in thông báo lỗi nếu có `message`.
+- **Controller (controllers/studentController.js)**: Lấy `keyword = req.query.keyword || ""`, nếu có thì gọi hàm search của Model. Khi render truyền `keyword` và `message` (nếu mảng kết quả trống thì `message = "Không tìm thấy sinh viên phù hợp"`).
+- **View (views/students/index.ejs)**: Gán thuộc tính `value="<%= keyword %>"` cho ô tìm kiếm và in thông báo lỗi nếu có `message`.
 
 ---
 
@@ -93,12 +84,12 @@
 
 ### **Hoàn thiện chức năng sửa**
 
-- **Route ([studentRoutes.js](file:///workspaces/kiem_tra/student-management/routes/studentRoutes.js))**:
+- **Route (routes/studentRoutes.js)**:
   ```javascript
   router.get("/edit/:id", studentController.editForm)
   router.post("/edit/:id", studentController.update)
   ```
-- **Model ([studentModel.js](file:///workspaces/kiem_tra/student-management/models/studentModel.js))**:
+- **Model (models/studentModel.js)**:
   ```javascript
   function updateStudent(id, student) {
     return new Promise((resolve, reject) => {
@@ -110,7 +101,7 @@
     })
   }
   ```
-- **Controller & View**: Hàm `editForm` lấy thông tin cũ truyền sang view để điền sẵn vào form bằng thuộc tính `value="<%= student.field %>"`. Hàm `update` lấy thông tin mới từ `req.body`, gọi model cập nhật và thực hiện `res.redirect("/students")`.
+- **Controller & View**: Hàm `editForm` lấy thông tin cũ từ database truyền sang view để điền sẵn vào form bằng thuộc tính `value="<%= student.field %>"`. Hàm `update` lấy thông tin mới từ `req.body`, gọi model cập nhật và thực hiện `res.redirect("/students")`.
 
 ---
 
@@ -118,11 +109,11 @@
 
 ### **Hoàn thiện chức năng xóa**
 
-- **Route ([studentRoutes.js](file:///workspaces/kiem_tra/student-management/routes/studentRoutes.js))**: Sử dụng phương thức POST để đảm bảo an toàn.
+- **Route (routes/studentRoutes.js)**: Sử dụng phương thức POST để đảm bảo an toàn.
   ```javascript
   router.post("/delete/:id", studentController.destroy)
   ```
-- **Model ([studentModel.js](file:///workspaces/kiem_tra/student-management/models/studentModel.js))**:
+- **Model (models/studentModel.js)**:
   ```javascript
   function deleteStudent(id) {
     return new Promise((resolve, reject) => {
@@ -134,7 +125,7 @@
     })
   }
   ```
-- **View ([index.ejs](file:///workspaces/kiem_tra/student-management/views/students/index.ejs))**: Gói nút xóa trong một thẻ `<form>` POST:
+- **View (views/students/index.ejs)**: Gói nút xóa trong một thẻ `<form>` POST:
   ```html
   <form method="POST" action="/students/delete/<%= student.id %>" class="inline-form">
     <button type="submit" onclick="return confirm('Bạn có chắc chắn muốn xóa?')">Xóa</button>
