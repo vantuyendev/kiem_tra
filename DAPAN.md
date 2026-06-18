@@ -1,3 +1,12 @@
+# BÀI LÀM KIỂM TRA GIỮA KỲ
+## HỌC PHẦN: THIẾT KẾ WEB NÂNG CAO
+
+- **Họ và tên:** Vạn Tuyên
+- **MSSV:** 24100462
+- **Lớp:** [Điền lớp của bạn vào đây]
+
+---
+
 ## PHẦN 1. PHÂN TÍCH PROJECT
 
 ### **Câu 1: Bảng xác định file xử lý hiển thị danh sách sinh viên**
@@ -35,6 +44,8 @@
   ```javascript
   router.get("/create", studentController.createForm)
   ```
+- **Minh chứng kết quả sau khi sửa**:
+  ![Form thêm mới sinh viên](dapan/phan2/1.png)
 
 ### **2. Lỗi 2: Báo lỗi không tìm thấy view (Cannot find view) sau khi submit form thêm mới**
 - **Nguyên nhân**: Hàm `store` trong **controllers/studentController.js** gọi `res.render("students/list")` nhưng không có tệp view `list.ejs`. Theo nguyên tắc web, sau khi thêm dữ liệu (POST) cần redirect về trang danh sách (GET).
@@ -42,6 +53,8 @@
   ```javascript
   res.redirect("/students")
   ```
+- **Minh chứng kết quả sau khi sửa**:
+  ![Danh sách sinh viên sau khi chuyển hướng](dapan/phan2/2.png)
 
 ### **3. Lỗi 3: Không lọc được kết quả khi tìm kiếm**
 - **Nguyên nhân**: Hàm `searchStudents(keyword)` trong **models/studentModel.js** không sử dụng tham số đầu vào `keyword` mà chỉ chạy câu lệnh SELECT lấy toàn bộ dữ liệu.
@@ -49,12 +62,17 @@
   ```javascript
   const sql = `SELECT * FROM students WHERE student_code LIKE ? OR fullname LIKE ? OR major LIKE ? ORDER BY id DESC`
   ```
+- **Minh chứng vị trí code cần sửa**:
+  ![Vị trí code cần sửa tìm kiếm](dapan/phan3/after.png)
 
 ### **4. Lỗi 4: Chức năng sửa và xóa không làm thay đổi dữ liệu trong CSDL**
 - **Nguyên nhân**: Hàm `updateStudent` và `deleteStudent` trong **models/studentModel.js** mới chỉ viết giả lập (`resolve(0)`) mà chưa tương tác với cơ sở dữ liệu.
 - **Cách sửa**: Bổ sung truy vấn SQL `UPDATE` và `DELETE` thực tế xuống SQLite:
   - Hàm `updateStudent`: Chạy lệnh `UPDATE students SET student_code = ?, fullname = ?, email = ?, major = ?, gpa = ? WHERE id = ?`.
   - Hàm `deleteStudent`: Chạy lệnh `DELETE FROM students WHERE id = ?`.
+- **Minh chứng vị trí code cần sửa**:
+  ![Vị trí code sửa chức năng cập nhật](dapan/phan4/new_edit.png)
+  ![Xác nhận xóa trong CSDL](dapan/phan5/remove.png)
 
 ---
 
@@ -77,6 +95,11 @@
   ```
 - **Controller (controllers/studentController.js)**: Lấy `keyword = req.query.keyword || ""`, nếu có thì gọi hàm search của Model. Khi render truyền `keyword` và `message` (nếu mảng kết quả trống thì `message = "Không tìm thấy sinh viên phù hợp"`).
 - **View (views/students/index.ejs)**: Gán thuộc tính `value="<%= keyword %>"` cho ô tìm kiếm và in thông báo lỗi nếu có `message`.
+- **Minh chứng kết quả**:
+  * **Trước khi tìm kiếm** (hiển thị toàn bộ sinh viên):
+    ![Trước khi tìm kiếm](dapan/phan3/before.png)
+  * **Sau khi tìm kiếm với từ khóa** (lọc chính xác kết quả):
+    ![Sau khi tìm kiếm](dapan/phan3/after.png)
 
 ---
 
@@ -102,6 +125,15 @@
   }
   ```
 - **Controller & View**: Hàm `editForm` lấy thông tin cũ từ database truyền sang view để điền sẵn vào form bằng thuộc tính `value="<%= student.field %>"`. Hàm `update` lấy thông tin mới từ `req.body`, gọi model cập nhật và thực hiện `res.redirect("/students")`.
+- **Minh chứng kết quả**:
+  * **Form sửa hiển thị đầy đủ dữ liệu cũ của sinh viên**:
+    ![Form sửa hiển thị thông tin cũ](dapan/phan4/old_edit.png)
+    ![Form sửa mới nhập liệu](dapan/phan4/new_edit.png)
+  * **Thông tin sinh viên trước và sau khi sửa đổi**:
+    * Thông tin sinh viên trước khi sửa (trong danh sách):
+      ![Thông tin trước khi sửa](dapan/phan4/old_changed.png)
+    * Dữ liệu trong danh sách đã được cập nhật thành công (sau khi sửa):
+      ![Dữ liệu sau khi sửa](dapan/phan4/new_changed.png)
 
 ---
 
@@ -131,6 +163,13 @@
     <button type="submit" onclick="return confirm('Bạn có chắc chắn muốn xóa?')">Xóa</button>
   </form>
   ```
+- **Minh chứng kết quả**:
+  * **Khi xóa**:
+    ![Xác nhận xóa](dapan/phan5/remove.png)
+  * **Danh sách sinh viên sau khi thực hiện xóa**:
+    ![Danh sách sau khi xóa](dapan/phan5/old_removed.png)
+  * **Danh sách sinh viên sau khi đã thực hiện xóa**:
+    ![Danh sách sau khi xóa](dapan/phan5/new_removed.png)
 
 ---
 
