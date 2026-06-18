@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Quản lý sinh viên</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Quản lý sinh viên</h1>
+    <p class="note">Hãy thay tiêu đề để hiển thị mã đề trên giao diện.</p>
+
+    <div class="toolbar">
+      <a class="btn" href="/students/create">Thêm sinh viên</a>
+    </div>
+
+    <form method="GET" action="/students" class="search-form">
+      <input type="text" name="keyword" value="<%= keyword %>" placeholder="Tìm theo mã SV, họ tên, ngành học">
+      <button type="submit">Tìm kiếm</button>
+    </form>
+
+    <% if (message) { %>
+      <p class="message"><%= message %></p>
+    <% } %>
+
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Mã SV</th>
+          <th>Họ tên</th>
+          <th>Email</th>
+          <th>Ngành học</th>
+          <th>GPA</th>
+          <th>Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% students.forEach(student => { %>
+          <tr>
+            <td><%= student.id %></td>
+            <td><%= student.student_code %></td>
+            <td><%= student.fullname %></td>
+            <td><%= student.email %></td>
+            <td><%= student.major %></td>
+            <td><%= student.gpa %></td>
+            <td>
+              <a href="/students/edit/<%= student.id %>">Sửa</a>
+
+              <form method="POST" action="/students/delete/<%= student.id %>" class="inline-form">
+                <button type="submit" onclick="return confirm('Bạn có chắc chắn muốn xóa?')">Xóa</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>
